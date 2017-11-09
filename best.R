@@ -8,35 +8,35 @@ best <- function(state, outcome, f="outcome-of-care-measures.csv") {
   state <- toupper(state)
   outcome <- tolower(outcome)
   
-  ## Read outcome data
+  ## Read and subset outcome data
   if(!file.exists(f)){
     stop(paste("File:", f, "not found in wd"))
   }
   outcome_data <- read.csv(f)
+  outcome_data <- subset(outcome_data, State==state)
+  
+  ## Rename columns of interest
+  outcome_names <- c("heart attack", "heart failure", "pneumonia")
+  colnames(outcome_data)[c(11, 17, 23)] <- outcome_names 
   
   ## Check that `state` is valid
   state_names <- unique(outcome_data$State)
   if(!(state %in% state_names)){
     stop(paste(state, "not found in dataset"))
   }
+
   ## Check that `outcome` is valid
-  process_colnames <- function(cn){
-    cn_split <- strsplit(cn, split=".", fixed=TRUE)[[1]]
-    return(tolower(cn_split[length(cn_split)]))
-  }
-  
-  outcome_names <- lapply(colnames(outcome_data), process_colnames)
-  outcome_names <- unique(outcome_names)
-  
   if(!(outcome %in% outcome_names)){
     stop(paste(outcome, "not in dataset"))
   }
-  
+
   ## Return hospital name in that state with lowest 30-day death
   ## rate
-  
-  
-  hsptl_names <- unique()
+  min_rate <- min(as.numeric(as.matrix(outcome_data[, outcome])), na.rm = TRUE)
+  lowest_idx <- which(as.numeric(as.matrix(outcome_data[, outcome]))==min_rate)
+  return(as.vector(outcome_data$Hospital.Name)[lowest_idx])
 }
+
+
 
 
