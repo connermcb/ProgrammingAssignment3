@@ -9,6 +9,7 @@ library(rlang)
 library(stringr)
 
 rankhospital <- function(state, outcome, num = "best", f="outcome-of-care-measures.csv") {
+  
   ## Format args
   state <- toupper(state)
   outcome <- str_replace_all(tolower(outcome), pattern = " ", repl="")
@@ -48,12 +49,12 @@ rankhospital <- function(state, outcome, num = "best", f="outcome-of-care-measur
     select(outcome, Hospital.Name)%>%
     arrange(!!outcome_col, Hospital.Name)
   if(num=="best"){
-    return(arrgnd_data[1])
+    return(arrgnd_data$Hospital.Name[1])
   }
   if(num=="worst"){
     arrgnd_data <- arrgnd_data%>%
       na.omit()
-    return(arrgnd_data[nrow(arrgnd_data),])
+    return(arrgnd_data$Hospital.Name[nrow(arrgnd_data)])
   }
   return(arrgnd_data$Hospital.Name[num])
   
@@ -61,3 +62,9 @@ rankhospital <- function(state, outcome, num = "best", f="outcome-of-care-measur
 
 rankhospital("TX", "heart failure", 4)
 rankhospital("MD", "heart attack", "worst")
+rankhospital("MN", "heart attack", 5000)
+rankhospital("NC", "heart attack", "worst")
+rankhospital("WA", "heart attack", 7)
+rankhospital("TX", "pneumonia", 10)
+rankhospital("NY", "heart attack", 7)
+rankhospital("GU", "heart attack", 20)
