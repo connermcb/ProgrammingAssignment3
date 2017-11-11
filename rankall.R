@@ -11,9 +11,38 @@
 ## not have data on a particular outcome should be excluded from the set of 
 ## hospitals when deciding the rankings.
 
-rankall <- function(outcome, num = "best") {
-  ## Read outcome data
-  ## Check that state and outcome are valid
+rankall <- function(outcome, num = "best", f="outcome-of-care-measures.csv") {
+  ## Format args
+  state <- toupper(state)
+  outcome <- str_replace_all(tolower(outcome), pattern = " ", repl="")
+  
+  ## Read and subset outcome data
+  if(!file.exists(f)){
+    stop(paste("File:", f, "not found in wd"))
+  }
+  outcome_data <- read.csv(f)
+  outcome_data <- subset(outcome_data, State==state)
+  
+  ## Rename columns of interest
+  outcome_names <- c("heartattack", "heartfailure", "pneumonia")
+  colnames(outcome_data)[c(11, 17, 23)] <- outcome_names 
+  
+  ## Change class of variable
+  outcome_data[, outcome] <- as.numeric(
+    as.matrix(
+      outcome_data[, outcome]
+    )
+  )
+  ## Check that `state` is valid
+  state_names <- unique(outcome_data$State)
+  if(!(state %in% state_names)){
+    stop(paste(state, "not found in dataset"))
+  }
+  
+  ## Check that value of `outcome` is valid
+  if(!(outcome %in% outcome_names)){
+    stop(paste(outcome, "not in dataset"))
+  }
   ## For each state, find the hospital of the given rank
   ## Return a data frame with the hospital names and the
   ## (abbreviated) state name
